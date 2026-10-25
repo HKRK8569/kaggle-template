@@ -1,0 +1,9 @@
+[project]
+name = "kaggle-template"
+version = "0.1.0"
+description = "A small uv-based workspace for Kaggle competitions"
+requires-python = ">=3.11"
+dependencies = ["kaggle", "python-dotenv"]
+
+[tool.uv]
+package = false

@@ -1,0 +1,11 @@
+.venv/
+.uv-cache/
+__pycache__/
+.ipynb_checkpoints/
+
+# Entire competition workspaces
+competitions/*
+
+# Keep credentials outside this repository. Ignore accidental local copies too.
+kaggle.json
+.env
