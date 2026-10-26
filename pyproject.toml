@@ -7,3 +7,10 @@ dependencies = ["kaggle", "python-dotenv"]
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
+    "pandas>=3.1.0",
+]
