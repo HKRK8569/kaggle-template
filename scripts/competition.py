@@ -1,4 +1,4 @@
-"""Create a per-competition workspace and download its Kaggle data."""
+"""Create a competition workspace and download its Kaggle data."""
 
 import argparse
 import re
@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPETITIONS = ROOT / "competitions"
-PROJECT_TEMPLATE = ROOT / "templates" / "tabular" / "pyproject.toml.template"
 SLUG_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 
 
@@ -28,17 +27,18 @@ def create_workspace(slug: str) -> Path:
     for name in ("data/raw", "notebooks", "src", "outputs", "submissions"):
         (directory / name).mkdir(parents=True, exist_ok=True)
 
-    pyproject = directory / "pyproject.toml"
-    if not pyproject.exists():
-        pyproject.write_text(
-            PROJECT_TEMPLATE.read_text(encoding="utf-8").replace("__SLUG__", slug),
+    vscode = directory / ".vscode"
+    vscode.mkdir(exist_ok=True)
+    settings = vscode / "settings.json"
+    if not settings.exists():
+        settings.write_text(
+            '{\n  "python.defaultInterpreterPath": "${workspaceFolder}/../../.venv"\n}\n',
             encoding="utf-8",
         )
-
-    python_version = directory / ".python-version"
-    if not python_version.exists():
-        python_version.write_text(
-            (ROOT / ".python-version").read_text(encoding="utf-8"),
+    extensions = vscode / "extensions.json"
+    if not extensions.exists():
+        extensions.write_text(
+            '{\n  "recommendations": ["ms-python.python", "ms-toolsai.jupyter"]\n}\n',
             encoding="utf-8",
         )
 
@@ -48,8 +48,7 @@ def create_workspace(slug: str) -> Path:
             f"# {slug}\n\n"
             f"コンテスト: https://www.kaggle.com/competitions/{slug}\n\n"
             "このディレクトリ全体は Git 管理対象外です。\n\n"
-            "このディレクトリで `uv sync` を実行すると、`pyproject.toml` の依存関係が\n"
-            "コンテスト専用の `.venv/` にインストールされます。\n\n"
+            "Pythonライブラリはリポジトリ直下の `pyproject.toml` と `.venv/` で共有します。\n\n"
             "- `data/raw/`: 取得したデータ\n"
             "- `notebooks/`: 分析用ノートブック\n"
             "- `src/`: 再利用するコード\n"
@@ -73,7 +72,6 @@ def main() -> int:
     directory = create_workspace(args.slug)
     if args.command == "new":
         print(f"Created {directory}")
-        print(f"Run 'uv sync' in {directory} to install its dependencies.")
         return 0
 
     load_dotenv(ROOT / ".env", override=False)
